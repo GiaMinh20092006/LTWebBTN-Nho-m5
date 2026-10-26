@@ -1,6 +1,10 @@
 # LTWebBTN-Nho-m5
+
 Never gonna give you up, never gonna let you down
 
+## 📁 Cấu trúc thư mục dự án
+
+```text
 LTWebBTN-Nho-m5/
 │
 ├── Project_API/                  # Chứa Backend & Database
@@ -20,4 +24,4 @@ LTWebBTN-Nho-m5/
 │       ├── login.html            # Trang đăng nhập
 │       └── admin.html            # Trang quản trị
 │
-└── README.md                     # (Đã có sẵn trên Github)
+└── README.md
