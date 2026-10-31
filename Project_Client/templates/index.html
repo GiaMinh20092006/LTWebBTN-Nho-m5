@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAYZONE | Game Store</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll(".alert.auto-dismiss");
+
+    alerts.forEach(function (alert) {
+        setTimeout(function () {
+            alert.classList.add("is-hidden");
+
+            setTimeout(function () {
+                alert.remove();
+
+                const container = document.querySelector(".alerts");
+
+                if (container && !container.querySelector(".alert")) {
+                    container.remove();
+                }
+            }, 400);
+
+        }, 2500);
+    });
+});
+</script>
+<body>
+
+<header class="header">
+    <div class="container nav">
+        <a href="{{ url_for('index') }}" class="logo">
+            <span class="logo-icon">V</span>
+            Vapor</span>
+        </a>
+
+        <nav class="menu">
+            <a class="active" href="{{ url_for('index') }}">Trang chủ</a>
+            <a href="#games">Cửa hàng</a>
+            <a href="#categories">Thể loại</a>
+        </nav>
+
+        <div class="nav-right">
+            <a href="{{ url_for('cart') }}" class="cart-link">
+                Giỏ hàng
+                <span class="cart-count">{{ cart_count|default(0) }}</span>
+            </a>
+
+            {% if logged_in_user|default(None) %}
+                <span class="username">
+                    {{ logged_in_user['username'] }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                    Đăng xuất
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline">
+                    Đăng nhập
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-orange">
+                    Đăng ký
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container alerts">
+            {% for category, message in messages %}
+                <div class="alert {{ category }}
+                    {% if category == 'success' %}auto-dismiss{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<section class="hero">
+    <div class="container hero-layout">
+
+        <div class="hero-content">
+            <div class="eyebrow">
+                <span class="dot"></span>
+                WELCOME TO Vapor
+            </div>
+
+            <h1>
+                Thế giới game.<br>
+                <span>Cuộc chơi của bạn.</span>
+            </h1>
+
+            <p class="hero-description">
+                Khám phá những tựa game hấp dẫn, từ hành động kịch tính
+                đến nhập vai và chiến thuật. Tìm cuộc phiêu lưu tiếp theo
+                của bạn ngay tại Vapor.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="#games" class="btn btn-orange btn-large">
+                    Khám phá game <span class="arrow">↗</span>
+                </a>
+                <a href="#categories" class="btn btn-outline btn-large">
+                    Xem thể loại
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div>
+                    <strong>{{ games|default([], true)|length }}</strong>
+                    <span>Game hiển thị</span>
+                </div>
+                <div>
+                    <strong>{{ categories|default([], true)|length }}</strong>
+                    <span>Thể loại</span>
+                </div>
+                <div>
+                    <strong>PLAY</strong>
+                    <span>Your own way</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="visual-glow"></div>
+            <div class="back-card">
+                <span>DISCOVER YOUR NEXT ADVENTURE</span>
+            </div>
+
+            <div class="front-card">
+                <div class="card-top">Vapor ORIGINAL</div>
+                <div class="big-symbol">VP<span>+</span></div>
+                <div class="card-bottom">
+                    <div>
+                        <strong>LEVEL UP</strong>
+                        <small>YOUR GAMING WORLD</small>
+                    </div>
+                    <span class="round-arrow">↗</span>
+                </div>
+            </div>
+
+            <div class="floating-label">GAME ON <span>●</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="container section" id="categories">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">CHOOSE YOUR STYLE</span>
+            <h2>Khám phá thể loại</h2>
+        </div>
+        <span class="muted">Tìm thể loại bạn yêu thích</span>
+    </div>
+
+    <div class="category-grid">
+        {% for category in categories|default([], true) %}
+            <a class="category-card"
+               href="{{ url_for('index', category=category['id']) }}">
+
+                <div class="category-icon">
+                    {% if category['name']|lower == 'action' %}
+                        ⚔
+                    {% elif category['name']|lower == 'rpg' %}
+                        ✦
+                    {% else %}
+                        ♜
+                    {% endif %}
+                </div>
+
+                <div class="category-info">
+                    <strong>{{ category['name'] }}</strong>
+                    <span>Khám phá game</span>
+                </div>
+
+                <span class="category-arrow">↗</span>
+            </a>
+        {% else %}
+            <p class="empty-message">Chưa có danh mục game.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container section games-section" id="games">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">VAPOR COLLECTION</span>
+            <h2>Khám phá game</h2>
+            <p class="section-description">
+                Những tựa game đang có trong cửa hàng của bạn.
+            </p>
+        </div>
+
+        <form action="{{ url_for('index') }}" method="get"
+              class="search-form">
+            <input type="text"
+                   name="q"
+                   value="{{ keyword|default('') }}"
+                   placeholder="Tìm tên game...">
+
+            {% if selected_category|default('') %}
+                <input type="hidden"
+                       name="category"
+                       value="{{ selected_category }}">
+            {% endif %}
+
+            <button type="submit" aria-label="Tìm kiếm">⌕</button>
+        </form>
+    </div>
+
+    <div class="filter-row">
+        <a href="{{ url_for('index', q=keyword|default('')) }}"
+           class="filter-chip
+           {% if not selected_category|default('') %}selected{% endif %}">
+            Tất cả
+        </a>
+
+        {% for category in categories|default([], true) %}
+            <a href="{{ url_for('index',
+                       category=category['id'],
+                       q=keyword|default('')) }}"
+               class="filter-chip
+               {% if selected_category|string == category['id']|string %}
+                   selected
+               {% endif %}">
+                {{ category['name'] }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="game-grid">
+        {% for game in games|default([], true) %}
+            <article class="game-card">
+
+                <a href="{{ url_for('game_detail', game_id=game['id']) }}"
+                   class="game-cover">
+
+                    {% if game['image_url'] %}
+                        <img src="{{ game['image_url'] }}"
+                             alt="{{ game['title'] }}"
+                             loading="lazy">
+                    {% else %}
+                        <div class="cover-placeholder">
+                            <span>VP</span>
+                            <small>GAME COVER</small>
+                        </div>
+                    {% endif %}
+
+                    <span class="game-tag">
+                        {{ game['category_name'] or 'Game' }}
+                    </span>
+                </a>
+
+                <div class="game-info">
+                    <a href="{{ url_for('game_detail', game_id=game['id']) }}"
+                       class="game-title">
+                        {{ game['title'] }}
+                    </a>
+
+                    <p class="game-description">
+                        {{ game['description'] or 'Khám phá game tại Vapor.' }}
+                    </p>
+
+                    <div class="game-bottom">
+                        <strong class="game-price">
+                            {{ "{:,.0f}".format(game['price']).replace(",", ".") }}đ
+                        </strong>
+
+                        <form method="post"
+                              action="{{ url_for('add_to_cart', game_id=game['id']) }}">
+                            <button type="submit"
+                                    class="add-button"
+                                    title="Thêm vào giỏ hàng">
+                                +
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <div class="no-games">
+                <div class="no-games-icon">⌕</div>
+                <h3>Chưa tìm thấy game phù hợp</h3>
+                <p>Thử từ khóa khác hoặc chọn một thể loại khác.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-orange">
+                    Xem tất cả game
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- BANNER CUỐI TRANG -->
+<section class="container">
+    <div class="promo-banner">
+        <div>
+            <span class="eyebrow">READY PLAYER ONE?</span>
+            <h2>Cuộc phiêu lưu tiếp theo<br>của bạn bắt đầu tại đây.</h2>
+            <p>Chọn tựa game yêu thích và khám phá thế giới mới.</p>
+            <a href="#games" class="btn btn-orange">
+                Khám phá cửa hàng ↗
+            </a>
+        </div>
+
+        <div class="promo-symbol">VP<span>+</span></div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container footer-content">
+        <a href="{{ url_for('index') }}" class="logo">
+            <span class="logo-icon">V</span>
+            Vapor</span>
+        </a>
+
+        <p>Nền tảng khám phá và phân phối game dành cho game thủ.</p>
+        <small>© 2026 Vapor. All rights reserved.</small>
+    </div>
+</footer>
+
+</body>
+</html>
