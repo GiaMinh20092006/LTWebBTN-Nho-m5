@@ -1,0 +1,219 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ game['title'] }} | VAPOR{% endblock %}
+
+{% block content %}
+
+<div class="container detail-page">
+
+    <div class="detail-breadcrumb">
+        <a href="{{ url_for('index') }}">Trang chủ</a>
+        <span>/</span>
+        <a href="{{ url_for('index') }}#games">Cửa hàng</a>
+        <span>/</span>
+        <strong>{{ game['title'] }}</strong>
+    </div>
+
+    <section class="detail-layout">
+
+        <!-- ẢNH BÌA -->
+        <div class="detail-cover">
+            {% if game['image_url'] %}
+                <img src="{{ game['image_url'] }}"
+                     alt="{{ game['title'] }}">
+            {% else %}
+                <div class="detail-cover-placeholder">
+                    <span>VAPOR</span>
+                    <strong>{{ game['title'] }}</strong>
+                </div>
+            {% endif %}
+
+            <div class="detail-cover-label">
+                VAPOR GAME STORE
+            </div>
+        </div>
+
+        <div class="detail-content">
+
+            <span class="detail-eyebrow">
+                GAME INFORMATION
+            </span>
+
+            <span class="detail-category">
+                {{ game['category_name'] or 'Game' }}
+            </span>
+
+            <h1>{{ game['title'] }}</h1>
+
+            <p class="detail-description">
+                {{ game['description'] or
+                   'Khám phá tựa game này tại Vapor.' }}
+            </p>
+
+            <div class="detail-divider"></div>
+
+            <div class="detail-meta">
+
+                <div>
+                    <span>Mã sản phẩm</span>
+                    <strong>#VP{{ "%04d"|format(game['id']) }}</strong>
+                </div>
+
+                <div>
+                    <span>Thể loại</span>
+                    <strong>
+                        {{ game['category_name'] or 'Đang cập nhật' }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Nhà phân phối</span>
+                    <strong>VAPOR</strong>
+                </div>
+
+            </div>
+
+            <div class="detail-divider"></div>
+
+            <div class="detail-purchase">
+
+                <span class="detail-price-label">Giá bán</span>
+
+                <div class="detail-price">
+                    {{ "{:,.0f}".format(game['price']).replace(",", ".") }}đ
+                </div>
+
+                <form method="POST"
+                      action="{{ url_for('add_to_cart',
+                                         game_id=game['id']) }}">
+
+                    <button type="submit"
+                            class="btn btn-orange detail-buy-button">
+                        Thêm vào giỏ hàng
+                        <span>↗</span>
+                    </button>
+
+                </form>
+
+                <a href="{{ url_for('index') }}#games"
+                   class="detail-back-button">
+                    ← Tiếp tục khám phá game
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="detail-information">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">ABOUT THIS GAME</span>
+                <h2>Giới thiệu sản phẩm</h2>
+            </div>
+        </div>
+
+        <div class="detail-description-box">
+            <h3>{{ game['title'] }}</h3>
+
+            <p>
+                {{ game['description'] or
+                   'Thông tin giới thiệu về tựa game sẽ được cập nhật.' }}
+            </p>
+        </div>
+
+    </section>
+
+
+    <section class="detail-related section">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">MORE TO EXPLORE</span>
+                <h2>Game có thể bạn quan tâm</h2>
+            </div>
+
+            <a href="{{ url_for('index') }}#games"
+               class="detail-view-all">
+                Xem tất cả ↗
+            </a>
+        </div>
+
+        <div class="game-grid">
+
+            {% for item in related_games %}
+
+                <article class="game-card">
+
+                    <a href="{{ url_for('game_detail',
+                                        game_id=item['id']) }}"
+                       class="game-cover">
+
+                        {% if item['image_url'] %}
+                            <img src="{{ item['image_url'] }}"
+                                 alt="{{ item['title'] }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="cover-placeholder">
+                                <span>VP</span>
+                                <small>GAME COVER</small>
+                            </div>
+                        {% endif %}
+
+                        <span class="game-tag">
+                            {{ item['category_name'] or 'Game' }}
+                        </span>
+
+                    </a>
+
+                    <div class="game-info">
+
+                        <a href="{{ url_for('game_detail',
+                                            game_id=item['id']) }}"
+                           class="game-title">
+                            {{ item['title'] }}
+                        </a>
+
+                        <p class="game-description">
+                            {{ item['description'] or
+                               'Khám phá game tại Vapor.' }}
+                        </p>
+
+                        <div class="game-bottom">
+
+                            <strong class="game-price">
+                                {{ "{:,.0f}".format(item['price']).replace(",", ".") }}đ
+                            </strong>
+
+                            <a href="{{ url_for('game_detail',
+                                                game_id=item['id']) }}"
+                               class="add-button"
+                               title="Xem chi tiết">
+                                ↗
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% else %}
+
+                <p class="empty-message">
+                    Chưa có game liên quan.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
