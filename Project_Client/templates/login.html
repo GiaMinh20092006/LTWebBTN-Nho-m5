@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập | VAPOR</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+
+<header class="header">
+    <div class="container nav">
+        <a href="{{ url_for('index') }}" class="logo">
+            <span class="logo-icon">V</span>
+            <span class="logo-text">VAPOR</span>
+        </a>
+
+        <nav class="menu">
+            <a href="{{ url_for('index') }}">Trang chủ</a>
+            <a href="{{ url_for('index') }}#games">Cửa hàng</a>
+            <a href="{{ url_for('index') }}#categories">Thể loại</a>
+        </nav>
+
+        <div class="nav-right">
+            <a href="{{ url_for('register') }}" class="btn btn-orange">
+                Đăng ký
+            </a>
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container alerts">
+            {% for category, message in messages %}
+                <div class="alert {{ category }}">
+                    {{ message }}
+
+                    {% if category == 'error' and 'Tài khoản không tồn tại' in message %}
+                        <a href="{{ url_for('register') }}">
+                            Đăng ký ngay
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<main class="auth-main">
+    <div class="auth-container">
+
+        <div class="auth-visual">
+            <span class="auth-eyebrow">WELCOME BACK, PLAYER</span>
+
+            <h1>
+                Tiếp tục<br>
+                <span>cuộc chơi.</span>
+            </h1>
+
+            <p>
+                Đăng nhập vào Vapor để khám phá kho game,
+                quản lý thư viện và tiếp tục hành trình của bạn.
+            </p>
+
+            <div class="auth-art">
+                <div class="auth-art-glow"></div>
+                <div class="auth-art-circle"></div>
+
+                <div class="auth-art-content">
+                    <span class="auth-art-logo">V</span>
+                    <strong>VAPOR</strong>
+                    <small>PLAY BEYOND REALITY</small>
+                </div>
+            </div>
+
+            <div class="auth-visual-footer">
+                <span>01</span>
+                <span class="auth-line"></span>
+                <span>YOUR GAMING WORLD</span>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-heading">
+                <span class="eyebrow">PLAYER ACCESS</span>
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng bạn quay trở lại Vapor!</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}"
+                  class="auth-form">
+
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Nhập tên đăng nhập"
+                        autocomplete="username"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Nhập mật khẩu"
+                        autocomplete="current-password"
+                        required>
+                </div>
+
+                <button type="submit" class="btn btn-orange auth-submit">
+                    Đăng nhập <span>↗</span>
+                </button>
+            </form>
+
+            <div class="auth-switch">
+                Chưa có tài khoản?
+                <a href="{{ url_for('register') }}">Đăng ký ngay</a>
+            </div>
+
+            <a href="{{ url_for('index') }}" class="auth-back">
+                ← Quay lại cửa hàng
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<footer class="footer auth-footer">
+    <div class="container footer-content">
+        <span class="auth-copyright">© 2026 VAPOR. ALL RIGHTS RESERVED.</span>
+        <span>PLAY BEYOND REALITY.</span>
+    </div>
+</footer>
+
+</body>
+</html>
