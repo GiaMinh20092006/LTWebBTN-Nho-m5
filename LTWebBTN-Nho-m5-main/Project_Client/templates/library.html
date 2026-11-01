@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Thư viện game | VAPOR{% endblock %}
+
+{% block content %}
+
+<div class="container library-page">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">YOUR ARCADE</span>
+            <h2 class="glitch-text" data-text="Thư viện của tôi">Thư viện của tôi</h2>
+            <p class="section-description">{{ games|length }} game đã sở hữu — chơi bất cứ lúc nào.</p>
+        </div>
+        <a href="{{ url_for('index') }}#games" class="btn btn-outline btn-small">+ Thêm game mới</a>
+    </div>
+
+    {% if games %}
+        <div class="game-grid">
+            {% for game in games %}
+                <article class="game-card owned polychromatic">
+                    <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="game-cover">
+                        <img src="{{ game_image(game) }}" alt="{{ game['title'] }}" loading="lazy">
+                        <span class="game-badge owned">SỞ HỮU ✓</span>
+                    </a>
+                    <div class="game-info">
+                        <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="game-title">{{ game['title'] }}</a>
+                        <span class="game-dev">{{ game['category_name'] or 'Game' }} · {{ game['developer'] or 'Vapor Studio' }}</span>
+                        <p class="game-description">{{ game['description'] or '' }}</p>
+                        <div class="game-bottom">
+                            <strong class="owned-label">Đã thanh toán</strong>
+                            <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="add-button" title="Chi tiết">↗</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-games">
+            <div class="no-games-icon glitch-text" data-text="▶">▶</div>
+            <h3>Thư viện còn trống</h3>
+            <p>Mua game từ cửa hàng — chúng sẽ tự mở khóa tại đây.</p>
+            <a href="{{ url_for('index') }}#games" class="btn btn-neon">Khám phá game</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng nhập | VAPOR{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+
+<main class="auth-main">
+    <div class="auth-container polychromatic">
+
+        <div class="auth-visual">
+            <span class="auth-eyebrow">WELCOME BACK, PLAYER</span>
+
+            <h1 class="hero-title">
+                <span class="title-line line-a">TIẾP TỤC</span>
+                <span class="title-line line-c glitch-text" data-text="CUỘC CHƠI">CUỘC CHƠI.</span>
+            </h1>
+
+            <p>
+                Đăng nhập vào Vapor để mở khóa thư viện game, quản lý ví neon
+                và tiếp tục hành trình trong lưới.
+            </p>
+
+            <div class="auth-art">
+                <div class="auth-art-glow"></div>
+                <div class="auth-art-circle"></div>
+                <div class="auth-art-content">
+                    <span class="auth-art-logo glitch-text" data-text="V">V</span>
+                    <strong class="glitch-text" data-text="VAPOR">VAPOR</strong>
+                    <small>PLAY BEYOND REALITY</small>
+                </div>
+            </div>
+
+            <div class="auth-visual-footer">
+                <span>01</span><span class="auth-line"></span><span>PLAYER ACCESS</span>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-heading">
+                <span class="eyebrow">INSERT COIN</span>
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng bạn quay trở lại Vapor!</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập (hoặc email)</label>
+                    <input type="text" id="username" name="username"
+                           placeholder="admin / minh / lanaplayer"
+                           autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Nhập mật khẩu"
+                           autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-neon auth-submit">
+                    Đăng nhập <span>↗</span>
+                </button>
+            </form>
+
+            <div class="demo-accounts">
+                <span>Tài khoản demo:</span>
+                <code>admin / admin123</code>
+                <code>minh / minh1234</code>
+                <code>lanaplayer / vapor123</code>
+            </div>
+
+            <div class="auth-switch">
+                Chưa có tài khoản? <a href="{{ url_for('register') }}">Đăng ký ngay</a>
+            </div>
+            <a href="{{ url_for('index') }}" class="auth-back">← Quay lại cửa hàng</a>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

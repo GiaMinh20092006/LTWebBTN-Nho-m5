@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}503 | API OFFLINE{% endblock %}
+
+{% block content %}
+<div class="container error-page">
+    <h1 class="glitch-text giant" data-text="503">503</h1>
+    <h2>Không kết nối được tới VAPOR API</h2>
+    <p>
+        Web Client đang cố gọi tới <code>{{ api_base }}</code> nhưng Backend API chưa chạy.
+        Hãy mở một terminal riêng và chạy:
+    </p>
+    <pre class="console-block">cd Project_API
+python init_db.py   # chỉ cần chạy lần đầu
+python app.py       # API sẽ mở cổng 5000</pre>
+    <a href="{{ url_for('index') }}" class="btn btn-neon btn-large">↻ Thử lại</a>
+</div>
+{% endblock %}

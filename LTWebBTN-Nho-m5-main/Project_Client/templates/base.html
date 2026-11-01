@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VAPOR | Game Store{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vapor-fx.css') }}">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2305010f'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23ff2e88' font-family='Arial'%3EV%3C/text%3E%3C/svg%3E">
+    <script src="{{ url_for('static', filename='js/vapor.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/radio.js') }}" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+<!-- NỀN 3D PERSPECTIVE GRID + HIỆU ỨNG POLYCHROMATIC BLUR -->
+<div class="fx-backdrop" aria-hidden="true">
+    <div class="fx-sky"></div>
+    <div class="fx-sun"></div>
+    <div class="fx-grid-floor"><div class="fx-grid-lines"></div></div>
+    <div class="fx-scanlines"></div>
+    <div class="fx-noise"></div>
+</div>
+
+<header class="header">
+    <div class="container nav">
+        <a href="{{ url_for('index') }}" class="logo">
+            <span class="logo-icon">V</span>
+            <span class="glitch-text logo-text" data-text="VAPOR">VAPOR</span>
+        </a>
+
+        <nav class="menu">
+            <a href="{{ url_for('index') }}"
+               class="{% if request.endpoint == 'index' %}active{% endif %}">Trang chủ</a>
+            <a href="{{ url_for('index') }}#games">Cửa hàng</a>
+            <a href="{{ url_for('index') }}#categories">Thể loại</a>
+            {% if logged_in_user %}
+                <a href="{{ url_for('library') }}"
+                   class="{% if request.endpoint == 'library' %}active{% endif %}">Thư viện</a>
+                <a href="{{ url_for('orders') }}"
+                   class="{% if request.endpoint == 'orders' %}active{% endif %}">Đơn hàng</a>
+                {% if is_admin %}
+                    <a href="{{ url_for('admin') }}"
+                       class="menu-admin {% if request.endpoint == 'admin' %}active{% endif %}">⚡ Admin</a>
+                {% endif %}
+            {% endif %}
+        </nav>
+
+        <div class="nav-right">
+            <button type="button" id="glitch-toggle"
+                    class="glitch-toggle" title="Bật/Tắt chế độ Glitch/Neon">
+                <span class="toggle-led"></span>
+                <span class="toggle-label">GLITCH</span>
+            </button>
+
+            <a href="{{ url_for('cart') }}" class="cart-link">
+                Giỏ hàng
+                <span class="cart-count">{{ cart_count | default(0) }}</span>
+            </a>
+
+            {% if logged_in_user %}
+                <a href="{{ url_for('wallet') }}" class="wallet-chip"
+                   title="Ví Vapor của bạn">
+                    <span class="wallet-icon">◈</span>
+                    <span>{{ vnd(logged_in_user.get('balance', 0)) }}</span>
+                </a>
+                <span class="username">@{{ logged_in_user['username'] }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                    Đăng xuất
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline">
+                    Đăng nhập
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-neon">
+                    Đăng ký
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container alerts">
+            {% for category, message in messages %}
+                <div class="alert {{ category }}
+                    {% if category == 'success' %}auto-dismiss{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<main class="page">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="container footer-content">
+        <a href="{{ url_for('index') }}" class="logo">
+            <span class="logo-icon">V</span>
+            <span class="glitch-text logo-text" data-text="VAPOR">VAPOR</span>
+        </a>
+        <p>Nền tảng khám phá &amp; phân phối game — PLAY BEYOND REALITY.</p>
+        <div class="footer-links">
+            <a href="{{ url_for('index') }}#games">Cửa hàng</a>
+            <a href="{{ url_for('index') }}#categories">Thể loại</a>
+            <a href="{{ url_for('library') }}">Thư viện</a>
+            <a href="{{ url_for('wallet') }}">Ví Vapor</a>
+        </div>
+        <small>© 2026 VAPOR GAME STORE · LTWebBTN · MADE WITH ◈ NEON</small>
+    </div>
+</footer>
+
+<!-- VAPOR-RADIO: MUSIC PLAYER GÓC MÀN HÌNH (WebAudio, tự tổng hợp âm thanh) -->
+<aside id="vapor-radio" class="vapor-radio" aria-label="Vapor-Radio">
+    <div class="radio-head">
+        <span class="radio-brand">◢ VAPOR-RADIO</span>
+        <button type="button" id="radio-minimize" class="radio-min"
+                title="Thu gọn đài">−</button>
+    </div>
+    <div class="radio-body">
+        <div class="radio-row">
+            <button type="button" id="radio-play" class="radio-play" title="Play / Pause">
+                ▶
+            </button>
+            <div class="radio-meta">
+                <strong id="radio-station-name">NEON DREAMS FM</strong>
+                <span id="radio-track-line">0000 : synthwave loop</span>
+            </div>
+        </div>
+        <div class="radio-viz" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="radio-row radio-controls">
+            <select id="radio-station" title="Chọn đài" aria-label="Chọn đài">
+                <option value="0">NEON DREAMS FM</option>
+                <option value="1">MIDNIGHT DRIVE FM</option>
+                <option value="2">CRYSTAL CHAPEL FM</option>
+                <option value="3">SAMURAI 88 FM</option>
+            </select>
+            <label class="radio-volume" title="Â lượng">
+                <span>VOL</span>
+                <input type="range" id="radio-volume" min="0" max="100" value="55">
+            </label>
+        </div>
+        <div class="radio-status">
+            <span class="radio-live"><b>●</b> LIVE</span>
+            <span id="radio-time">--:--</span>
+        </div>
+    </div>
+</aside>
+
+</body>
+</html>
