@@ -17,22 +17,21 @@
 
     <section class="detail-layout">
 
-        <!-- ẢNH BÌA -->
-        <div class="detail-cover">
-            {% if game['image_url'] %}
-                <img src="{{ game['image_url'] }}"
-                     alt="{{ game['title'] }}">
-            {% else %}
-                <div class="detail-cover-placeholder">
-                    <span>VAPOR</span>
-                    <strong>{{ game['title'] }}</strong>
-                </div>
-            {% endif %}
-
-            <div class="detail-cover-label">
-                VAPOR GAME STORE
+    <div class="detail-cover">
+        {% if game['image_url'] %}
+            <img src="{{ game['image_url'] }}"
+                 alt="{{ game['title'] }}">
+        {% else %}
+            <div class="detail-cover-placeholder">
+                <span>VAPOR</span>
+                <strong>{{ game['title'] }}</strong>
             </div>
+        {% endif %}
+
+        <div class="detail-cover-label">
+            VAPOR GAME STORE
         </div>
+    </div>
 
         <div class="detail-content">
 
