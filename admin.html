@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng điều khiển Admin | VAPOR{% endblock %}
+{% block body_class %}admin-page{% endblock %}
+
+{% block content %}
+
+<div class="container admin-page">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">◢ CONTROL DECK</span>
+            <h2 class="glitch-text" data-text="Trung tâm điều hành VAPOR">Trung tâm điều hành VAPOR</h2>
+            <p class="section-description">Xin chào quản trị viên @{{ logged_in_user['username'] }} — quyền ADMIN đang bật.</p>
+        </div>
+        <a href="{{ url_for('index') }}" class="btn btn-outline btn-small">← Về cửa hàng</a>
+    </div>
+
+    <!-- THẺ THỐNG KÊ -->
+    <div class="stat-grid">
+        {% for label, value, code in [
+            ('Tổng người dùng', stats.get('total_users', 0), 'USR'),
+            ('Tổng game', stats.get('total_games', 0), 'GME'),
+            ('Thể loại', stats.get('total_categories', 0), 'CAT'),
+            ('Đơn hàng', stats.get('total_orders', 0), 'ORD'),
+            ('Đánh giá', stats.get('total_reviews', 0), 'REV'),
+            ('Game miễn phí', stats.get('free_games', 0), 'F2P'),
+        ] %}
+            <div class="stat-card polychromatic">
+                <span class="stat-code">{{ code }}</span>
+                <strong class="stat-value glitch-text" data-text="{{ value }}">{{ value }}</strong>
+                <span class="stat-label">{{ label }}</span>
+            </div>
+        {% endfor %}
+        <div class="stat-card revenue">
+            <span class="stat-code">💰</span>
+            <strong class="stat-value">{{ vnd(stats.get('total_revenue', 0)) }}</strong>
+            <span class="stat-label">Tổng doanh thu</span>
+        </div>
+        <div class="stat-card revenue">
+            <span class="stat-code">Ø</span>
+            <strong class="stat-value">{{ vnd(stats.get('average_order', 0)) }}</strong>
+            <span class="stat-label">Giá trị đơn trung bình</span>
+        </div>
+    </div>
+
+    <div class="admin-columns">
+        <!-- BIỂU ĐỒ DOANH THU THEO THÁNG -->
+        <section class="panel">
+            <h3><span class="eyebrow">REVENUE STREAM</span>Doanh thu theo tháng</h3>
+            {% if monthly %}
+                {% set maxrev = namespace(v=1) %}
+                {% for row in monthly %}{% if row.revenue > maxrev.v %}{% set maxrev.v = row.revenue %}{% endif %}{% endfor %}
+                <div class="bar-chart">
+                    {% for row in monthly %}
+                        <div class="bar-col" title="{{ row.month }}: {{ vnd(row.revenue) }}">
+                            <span class="bar" style="height: {{ ((row.revenue / maxrev.v * 100)|round)|int }}%"></span>
+                            <small>{{ row.month[5:] }}</small>
+                            <em>{{ row.orders }}</em>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-message">Chưa có dữ liệu doanh thu.</p>
+            {% endif %}
+        </section>
+
+        <!-- TOP GAME -->
+        <section class="panel">
+            <h3><span class="eyebrow">BEST SELLERS</span>Top 10 game bán chạy</h3>
+            <table class="data-table compact">
+                <thead><tr><th>#</th><th>Game</th><th>Thể loại</th><th>Đã bán</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                    {% for g in top_games %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><a href="{{ url_for('game_detail', game_id=g['id']) }}">{{ g['title'] }}</a></td>
+                            <td>{{ g['category_name'] or '—' }}</td>
+                            <td>{{ g['sold'] }}</td>
+                            <td>{{ vnd(g['revenue']) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5">Chưa có dữ liệu.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- ĐƠN HÀNG GẦN ĐÂY -->
+    <section class="panel">
+        <h3><span class="eyebrow">ORDER FEED</span>Đơn hàng gần đây</h3>
+        <table class="data-table">
+            <thead><tr><th>Mã đơn</th><th>Người mua</th><th>Số game</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thời gian</th></tr></thead>
+            <tbody>
+                {% for o in recent_orders %}
+                    <tr>
+                        <td>#VP{{ "%05d"|format(o['id']) }}</td>
+                        <td>@{{ o['username'] }}</td>
+                        <td>{{ o['item_count'] }}</td>
+                        <td>{{ vnd(o['total_amount']) }}</td>
+                        <td><span class="order-status {{ o['status']|lower }}">{{ o['status'] }}</span></td>
+                        <td>{{ o['order_date'] }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6">Chưa có đơn hàng.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <!-- THÊM GAME MỚI -->
+    <section class="panel">
+        <h3><span class="eyebrow">NEW DROP</span>Thêm game mới vào cửa hàng</h3>
+        <form method="POST" action="{{ url_for('admin_create_game') }}" class="admin-form grid-3">
+            <label>Tên game *<input name="title" required placeholder="Cyber Drift 2077"></label>
+            <label>Thể loại *
+                <select name="category_id" required>
+                    {% for c in categories %}<option value="{{ c['id'] }}">{{ c['name'] }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Giá (VND)<input type="number" name="price" min="0" step="1000" value="299000"></label>
+            <label>Nhà phát triển<input name="developer" placeholder="Neon Forge Studio"></label>
+            <label>Ngày phát hành<input type="date" name="release_date"></label>
+            <label>Điểm (0–5)<input type="number" name="rating" min="0" max="5" step="0.1" value="4.0"></label>
+            <label>Nền tảng<input name="platforms" placeholder="PC, PS5, Xbox" value="PC"></label>
+            <label>Thẻ tag<input name="tags" placeholder="neon, retro, synthwave"></label>
+            <label class="span-3">Mô tả<textarea name="description" rows="2" placeholder="Giới thiệu ngắn về game..."></textarea></label>
+            <button type="submit" class="btn btn-neon span-3">+ Đăng game mới</button>
+        </form>
+    </section>
+
+    <!-- QUẢN LÝ GAME HIỆN CÓ -->
+    <section class="panel">
+        <h3><span class="eyebrow">INVENTORY</span>Quản lý kho game ({{ game_total }})</h3>
+        <form method="GET" action="{{ url_for('admin') }}" class="search-form admin-game-search">
+            <input name="q" value="{{ game_q or '' }}" placeholder="Tìm game trong kho...">
+            <input type="hidden" name="gpage" value="1">
+            <button type="submit">&oslash;</button>
+        </form>
+        <div class="admin-game-list">
+            {% for game in games %}
+                <details class="admin-game-row" {% if loop.index == 1 %}open{% endif %}>
+                    <summary>
+                        <span class="row-id">#{{ "%04d"|format(game['id']) }}</span>
+                        <strong>{{ game['title'] }}</strong>
+                        <span class="row-cat">{{ game['category_name'] or '—' }}</span>
+                        <span class="game-price">{{ vnd(game['price']) }}</span>
+                    </summary>
+                    <form method="POST" action="{{ url_for('admin_update_game', game_id=game['id']) }}" class="admin-form grid-3">
+                        <label>Tên<input name="title" value="{{ game['title'] }}" required></label>
+                        <label>Thể loại
+                            <select name="category_id">
+                                {% for c in categories %}
+                                    <option value="{{ c['id'] }}" {% if c['id'] == game['category_id'] %}selected{% endif %}>{{ c['name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label>Giá<input type="number" name="price" min="0" step="1000" value="{{ game['price']|int }}"></label>
+                        <label>Dev<input name="developer" value="{{ game['developer'] or '' }}"></label>
+                        <label>Phát hành<input name="release_date" value="{{ game['release_date'] or '' }}"></label>
+                        <label>Điểm<input type="number" name="rating" min="0" max="5" step="0.1" value="{{ game['rating'] }}"></label>
+                        <label>Nền tảng<input name="platforms" value="{{ game['platforms'] or '' }}"></label>
+                        <label>Tags<input name="tags" value="{{ game['tags'] or '' }}"></label>
+                        <label class="span-3">Mô tả<input name="description" value="{{ game['description'] or '' }}"></label>
+                        <div class="row-actions span-3">
+                            <button type="submit" class="btn btn-outline btn-small">💾 Lưu thay đổi</button>
+                        </div>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin_delete_game', game_id=game['id']) }}"
+                          class="delete-form"
+                          onsubmit="return confirm('Xóa game {{ game['title'] }}? Thao tác này xóa luôn đánh giá & chi tiết đơn hàng!');">
+                        <button type="submit" class="btn btn-danger btn-small">✕ Xóa game</button>
+                    </form>
+                </details>
+            {% else %}
+                <p class="muted">Không tìm thấy game nào khớp từ khóa "{{ game_q }}".</p>
+            {% endfor %}
+        </div>
+        {% if game_pages > 1 %}
+            <nav class="pagination admin-pager">
+                {% if game_page > 1 %}
+                    <a class="btn btn-outline btn-small" href="{{ url_for('admin', q=game_q, gpage=game_page-1) }}">&larr; Trang trước</a>
+                {% endif %}
+                {% for p in range(1, game_pages + 1) %}
+                    <a class="page-link {% if p == game_page %}selected{% endif %}" href="{{ url_for('admin', q=game_q, gpage=p) }}">{{ p }}</a>
+                {% endfor %}
+                {% if game_page < game_pages %}
+                    <a class="btn btn-outline btn-small" href="{{ url_for('admin', q=game_q, gpage=game_page+1) }}">Trang sau &rarr;</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+
+    <!-- QUẢN LÝ THỂ LOẠI -->
+    <section class="panel">
+        <h3><span class="eyebrow">CATEGORIES</span>Thể loại game</h3>
+        <div class="cat-manage">
+            {% for c in categories %}
+                <div class="cat-pill">
+                    <span>{{ c['icon'] }} {{ c['name'] }}</span>
+                    <small>{{ c['game_count']|default(0) }} game</small>
+                    <form method="POST" action="{{ url_for('admin_delete_category', category_id=c['id']) }}"
+                          onsubmit="return confirm('Xóa thể loại {{ c['name'] }}?');">
+                        <button type="submit" title="Xóa thể loại">✕</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+        <form method="POST" action="{{ url_for('admin_create_category') }}" class="admin-form inline">
+            <label>Tên *<input name="name" required placeholder="Vaporwave"></label>
+            <label>Slug *<input name="slug" required placeholder="vaporwave"></label>
+            <label>Icon<input name="icon" maxlength="2" placeholder="❖"></label>
+            <button type="submit" class="btn btn-neon btn-small">+ Thêm thể loại</button>
+        </form>
+    </section>
+</div>
+
+{% endblock %}
