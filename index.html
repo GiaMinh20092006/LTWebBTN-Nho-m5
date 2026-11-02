@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}VAPOR | Thế Giới Game Neon{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="container hero-layout">
+
+        <div class="hero-content">
+            <div class="eyebrow">
+                <span class="dot"></span>
+                WELCOME TO <span class="glitch-text" data-text="THE GRID">THE GRID</span>
+            </div>
+
+            <h1 class="hero-title">
+                <span class="title-line line-a">THẾ GIỚI</span>
+                <span class="title-line line-b glitch-text" data-text="GAME">GAME</span>
+                <span class="title-line line-c">CUỘC CHƠI<em>của bạn</em></span>
+            </h1>
+
+            <p class="hero-description">
+                {{ total_games }} tựa game đang chờ trong lưới neon — từ
+                Synthwave Racing, Cyberpunk RPG tới Indie Vaporwave. Tìm,
+                nghe Vapor-Radio và mua bằng ví điện tử của bạn.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="#games" class="btn btn-neon btn-large">
+                    Khám phá game <span class="arrow">↗</span>
+                </a>
+                <a href="#categories" class="btn btn-outline btn-large">
+                    Xem thể loại
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div>
+                    <strong class="stat-num glitch-text" data-text="{{ total_games }}">{{ total_games }}</strong>
+                    <span>Game trong store</span>
+                </div>
+                <div>
+                    <strong class="stat-num">{{ categories|default([], true)|length }}</strong>
+                    <span>Thể loại</span>
+                </div>
+                <div>
+                    <strong class="stat-num">4</strong>
+                    <span>Đài Vapor-Radio</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <div class="visual-ring ring-1"></div>
+            <div class="visual-ring ring-2"></div>
+            <div class="visual-card front-card polychromatic">
+                <div class="card-top">◢ VAPOR ORIGINAL</div>
+                <div class="big-symbol glitch-text" data-text="VP+">VP<span>+</span></div>
+                <div class="card-bottom">
+                    <div>
+                        <strong>LEVEL UP</strong>
+                        <small>YOUR GAMING WORLD</small>
+                    </div>
+                    <span class="round-arrow">↗</span>
+                </div>
+            </div>
+            <div class="floating-label">GAME ON <span>●</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="container section" id="categories">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">CHOOSE YOUR STYLE</span>
+            <h2 class="glitch-text" data-text="Khám phá thể loại">Khám phá thể loại</h2>
+        </div>
+        <span class="muted">12 dòng game — mỗi dòng một màu neon</span>
+    </div>
+
+    <div class="category-grid">
+        {% for category in categories|default([], true) %}
+            <a class="category-card"
+               href="{{ url_for('index', category=category['id']) }}">
+                <div class="category-icon">{{ category['icon'] or '◆' }}</div>
+                <div class="category-info">
+                    <strong>{{ category['name'] }}</strong>
+                    <span>{{ category['game_count']|default(0) }} game</span>
+                </div>
+                <span class="category-arrow">↗</span>
+            </a>
+        {% else %}
+            <p class="empty-message">Chưa có danh mục game.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container section games-section" id="games">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">VAPOR COLLECTION</span>
+            <h2 class="glitch-text" data-text="Cửa hàng neon">Cửa hàng neon</h2>
+            <p class="section-description">
+                Trang {{ page }}/{{ pages }} — {{ total_games }} kết quả trong lưới.
+            </p>
+        </div>
+
+        <form action="{{ url_for('index') }}" method="get" class="search-form">
+            <input type="text" name="q" value="{{ keyword }}"
+                   placeholder="Tìm game, studio, tag...">
+            <input type="hidden" name="category" value="{{ selected_category }}">
+            <input type="hidden" name="sort" value="{{ selected_sort }}">
+            <button type="submit" aria-label="Tìm kiếm">⌕</button>
+        </form>
+    </div>
+
+    <div class="filter-row">
+        <a href="{{ url_for('index', q=keyword) }}"
+           class="filter-chip {% if not selected_category %}selected{% endif %}">Tất cả</a>
+
+        {% for category in categories|default([], true) %}
+            <a href="{{ url_for('index', category=category['id'], q=keyword, sort=selected_sort) }}"
+               class="filter-chip {% if selected_category|string == category['id']|string %}selected{% endif %}">
+                {{ category['icon']|default('◆') }} {{ category['name'] }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <form method="get" action="{{ url_for('index') }}" class="toolbar-form">
+        <input type="hidden" name="q" value="{{ keyword }}">
+        <input type="hidden" name="category" value="{{ selected_category }}">
+
+        <label>Giá tối đa
+            <select name="max_price">
+                <option value="">Mọi mức giá</option>
+                {% for cap in [200000, 400000, 700000, 1000000, 1500000] %}
+                    <option value="{{ cap }}" {% if max_price == cap|string %}selected{% endif %}>
+                        Dưới {{ vnd(cap) }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>Sắp xếp
+            <select name="sort">
+                <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+                <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Bán chạy</option>
+                <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Điểm cao</option>
+                <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Giá: thấp → cao</option>
+                <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Giá: cao → thấp</option>
+                <option value="az" {% if selected_sort == 'az' %}selected{% endif %}>Tên A → Z</option>
+            </select>
+        </label>
+
+        <label class="checkbox-chip">
+            <input type="checkbox" name="free" value="1" {% if free_only %}checked{% endif %}>
+            Chỉ game miễn phí
+        </label>
+
+        <button type="submit" class="btn btn-outline btn-small">Áp dụng</button>
+        <a href="{{ url_for('index') }}" class="btn btn-ghost btn-small">Xóa lọc</a>
+    </form>
+
+    <div class="game-grid">
+        {% for game in games|default([], true) %}
+            <article class="game-card polychromatic">
+                <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="game-cover">
+                    <img src="{{ game_image(game) }}" alt="{{ game['title'] }}" loading="lazy">
+                    <span class="game-tag">{{ game['category_name'] or 'Game' }}</span>
+                    {% if game['price'] == 0 %}
+                        <span class="game-badge free">F2P</span>
+                    {% elif game['rating'] and game['rating'] >= 4.7 %}
+                        <span class="game-badge hot">★ HOT</span>
+                    {% endif %}
+                </a>
+
+                <div class="game-info">
+                    <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="game-title">
+                        {{ game['title'] }}
+                    </a>
+                    <span class="game-dev">{{ game['developer'] or 'Vapor Studio' }}</span>
+                    <p class="game-description">{{ game['description'] or 'Khám phá game tại Vapor.' }}</p>
+
+                    <div class="game-bottom">
+                        <strong class="game-price">{{ vnd(game['price']) }}</strong>
+                        <div class="game-actions">
+                            <span class="stars" title="Điểm {{ game['rating'] }}">
+                                {% set r = (game['rating'] or 0)|round|int %}
+                                {% for _ in range(5) %}{% if loop.index <= r %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                            <form method="post"
+                                  action="{{ url_for('add_to_cart', game_id=game['id']) }}">
+                                <input type="hidden" name="next"
+                                       value="{{ url_for('index', q=keyword, category=selected_category, sort=selected_sort, page=page) }}">
+                                <button type="submit" class="add-button" title="Thêm vào giỏ hàng">+</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <div class="no-games">
+                <div class="no-games-icon glitch-text" data-text="⌕">⌕</div>
+                <h3>Chưa tìm thấy game phù hợp</h3>
+                <p>Thử từ khóa khác, đổi thể loại hoặc bỏ bộ lọc giá.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-neon">Xem tất cả game</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if pages > 1 %}
+        <nav class="pagination" aria-label="Phân trang">
+            {% if page > 1 %}
+                <a href="{{ page_url(page - 1) }}" class="page-btn">← Prev</a>
+            {% endif %}
+            {% set start = [1, page - 2] | max %}
+            {% set stop = [pages, page + 2] | min %}
+            {% for p in range(start, stop + 1) %}
+                {% if p == page %}
+                    <span class="page-btn current">{{ p }}</span>
+                {% else %}
+                    <a href="{{ page_url(p) }}" class="page-btn">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page < pages %}
+                <a href="{{ page_url(page + 1) }}" class="page-btn">Next →</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+
+<section class="container">
+    <div class="promo-banner">
+        <div>
+            <span class="eyebrow">READY PLAYER ONE?</span>
+            <h2 class="glitch-text" data-text="Cuộc phiêu lưu tiếp theo">Cuộc phiêu lưu tiếp theo</h2>
+            <p>Chọn game yêu thích, nạp ví Vapor và nhấn THANH TOÁN — thư viện tự mở khóa.</p>
+            <a href="#games" class="btn btn-neon">Khám phá cửa hàng ↗</a>
+        </div>
+        <div class="promo-symbol glitch-text" data-text="VP+">VP<span>+</span></div>
+    </div>
+</section>
+
+{% endblock %}

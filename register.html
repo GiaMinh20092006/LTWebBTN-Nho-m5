@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng ký | VAPOR{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+
+<main class="auth-main">
+    <div class="auth-container polychromatic">
+
+        <div class="auth-visual">
+            <span class="auth-eyebrow">JOIN THE VAPOR NETWORK</span>
+
+            <h1 class="hero-title">
+                <span class="title-line line-a">BẮT ĐẦU</span>
+                <span class="title-line line-c glitch-text" data-text="HÀNH TRÌNH">HÀNH TRÌNH.</span>
+            </h1>
+
+            <p>
+                Tạo tài khoản Vapor để lưu game yêu thích, chấm điểm cộng đồng
+                và xây dựng thư viện neon của riêng bạn.
+            </p>
+
+            <div class="auth-art">
+                <div class="auth-art-glow"></div>
+                <div class="auth-art-circle"></div>
+                <div class="auth-art-content">
+                    <span class="auth-art-logo glitch-text" data-text="V">V</span>
+                    <strong class="glitch-text" data-text="VAPOR">VAPOR</strong>
+                    <small>YOUR GAME. YOUR WORLD.</small>
+                </div>
+            </div>
+
+            <div class="auth-visual-footer">
+                <span>02</span><span class="auth-line"></span><span>CREATE PLAYER ACCOUNT</span>
+            </div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-heading">
+                <span class="eyebrow">NEW PLAYER</span>
+                <h2>Tạo tài khoản</h2>
+                <p>Đăng ký để trở thành công dân của lưới neon.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập</label>
+                    <input type="text" id="username" name="username"
+                           placeholder="Ít nhất 3 ký tự" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Địa chỉ Email</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="player@vaporwave.vn" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Ít nhất 6 ký tự" autocomplete="new-password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Xác nhận mật khẩu</label>
+                    <input type="password" id="confirm_password" name="confirm_password"
+                           placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-neon auth-submit">
+                    Tạo tài khoản <span>↗</span>
+                </button>
+            </form>
+
+            <div class="auth-switch">
+                Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a>
+            </div>
+            <a href="{{ url_for('index') }}" class="auth-back">← Quay lại cửa hàng</a>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

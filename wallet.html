@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Ví Vapor | VAPOR{% endblock %}
+
+{% block content %}
+
+<div class="container wallet-page">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">CHECKPOINT 03</span>
+            <h2 class="glitch-text" data-text="Ví Vapor">Ví Vapor</h2>
+            <p class="section-description">Số dư dùng để thanh toán game trong lưới neon.</p>
+        </div>
+    </div>
+
+    <div class="wallet-layout">
+        <div class="wallet-card polychromatic">
+            <span class="wallet-brand">◈ VAPOR WALLET</span>
+            <div class="wallet-balance glitch-text" data-text="{{ vnd(logged_in_user.get('balance', 0)) }}">
+                {{ vnd(logged_in_user.get('balance', 0)) }}
+            </div>
+            <span class="wallet-holder">@{{ logged_in_user['username'] }} · {{ logged_in_user['email'] }}</span>
+            <div class="wallet-chip-icon">▣▣▣</div>
+        </div>
+
+        <form method="POST" action="{{ url_for('wallet_deposit') }}" class="deposit-form">
+            <h3>Nạp tiền vào ví</h3>
+            <div class="form-group">
+                <label for="amount">Số tiền (VND)</label>
+                <input type="number" id="amount" name="amount" min="10000" max="50000000"
+                       step="10000" value="500000" required>
+            </div>
+            <div class="quick-amounts">
+                {% for preset in [100000, 200000, 500000, 1000000, 2000000] %}
+                    <button type="button" class="chip-preset" data-amount="{{ preset }}">{{ vnd(preset) }}</button>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="note">Nội dung (tùy chọn)</label>
+                <input type="text" id="note" name="note" maxlength="120"
+                       placeholder="Nạp quỹ chơi game cuối tuần">
+            </div>
+            <button type="submit" class="btn btn-neon">Nạp tiền ↗</button>
+        </form>
+    </div>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">LEDGER</span>
+                <h2>Lịch sử giao dịch</h2>
+            </div>
+            <span class="muted">{{ transactions|length }} bản ghi gần nhất</span>
+        </div>
+
+        {% if transactions %}
+            <table class="data-table">
+                <thead>
+                    <tr><th>#</th><th>Loại</th><th>Nội dung</th><th>Số tiền</th><th>Thời gian</th></tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                        <tr class="{{ tx['kind'] }}">
+                            <td>{{ tx['id'] }}</td>
+                            <td><span class="tx-kind {{ tx['kind'] }}">{{ 'NẠP' if tx['kind'] == 'deposit' else 'MUA' }}</span></td>
+                            <td>{{ tx['note'] or '' }}</td>
+                            <td class="{{ 'plus' if tx['amount'] > 0 else 'minus' }}">
+                                {{ '+' if tx['amount'] > 0 else '' }}{{ vnd(tx['amount']) }}
+                            </td>
+                            <td>{{ tx['created_at'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-message">Chưa có giao dịch nào. Hãy nạp tiền để bắt đầu!</p>
+        {% endif %}
+    </section>
+</div>
+
+{% endblock %}

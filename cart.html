@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Giỏ hàng | VAPOR{% endblock %}
+
+{% block content %}
+
+<div class="container cart-page">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">CHECKPOINT 01</span>
+            <h2 class="glitch-text" data-text="Giỏ hàng của bạn">Giỏ hàng của bạn</h2>
+            <p class="section-description">{{ items|length }} game đang chờ được sở hữu.</p>
+        </div>
+        {% if items %}
+            <form method="POST" action="{{ url_for('clear_cart') }}">
+                <button type="submit" class="btn btn-ghost btn-small">Xóa tất cả</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if items %}
+        <div class="cart-layout">
+            <div class="cart-list">
+                {% for game in items %}
+                    <article class="cart-item polychromatic">
+                        <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="cart-thumb">
+                            <img src="{{ game_image(game) }}" alt="{{ game['title'] }}">
+                        </a>
+                        <div class="cart-info">
+                            <a href="{{ url_for('game_detail', game_id=game['id']) }}" class="cart-title">
+                                {{ game['title'] }}
+                            </a>
+                            <span class="cart-meta">
+                                {{ game['category_name'] or 'Game' }} · {{ game['developer'] or 'Vapor Studio' }}
+                            </span>
+                            <span class="stars">
+                                {% set r = (game['rating'] or 0)|round(0)|int %}
+                                {% for _ in range(5) %}{% if loop.index <= r %}★{% else %}☆{% endif %}{% endfor %}
+                            </span>
+                        </div>
+                        <div class="cart-end">
+                            <strong class="game-price">{{ vnd(game['price']) }}</strong>
+                            <form method="POST" action="{{ url_for('remove_from_cart', game_id=game['id']) }}">
+                                <button type="submit" class="btn btn-ghost btn-small" title="Bỏ khỏi giỏ">✕</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <aside class="cart-summary">
+                <h3>Tóm tắt đơn</h3>
+                <div class="summary-line"><span>Số game</span><strong>{{ items|length }}</strong></div>
+                <div class="summary-line"><span>Tạm tính</span><strong>{{ vnd(total) }}</strong></div>
+                <div class="summary-line"><span>Phí giao dịch neon</span><strong>0đ</strong></div>
+                <div class="summary-line grand"><span>Tổng cộng</span><strong class="glitch-text" data-text="{{ vnd(total) }}">{{ vnd(total) }}</strong></div>
+
+                {% if logged_in_user %}
+                    <div class="summary-wallet">
+                        Số dư ví: <strong>{{ vnd(balance) }}</strong>
+                        {% if balance < total %}
+                            <a href="{{ url_for('wallet') }}" class="topup-link">→ Nạp thêm tiền</a>
+                        {% endif %}
+                    </div>
+                    <form method="POST" action="{{ url_for('checkout') }}">
+                        <button type="submit" class="btn btn-neon checkout-button"
+                                {% if balance < total %}disabled{% endif %}>
+                            {% if balance < total %}Không đủ số dư ví{% else %}THANH TOÁN ↗{% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('login', next=url_for('cart')) }}" class="btn btn-neon checkout-button">
+                        Đăng nhập để thanh toán
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('index') }}#games" class="detail-back-button">← Tiếp tục mua sắm</a>
+            </aside>
+        </div>
+    {% else %}
+        <div class="no-games">
+            <div class="no-games-icon glitch-text" data-text="◈">◈</div>
+            <h3>Giỏ hàng đang trống</h3>
+            <p>Thêm vài tựa game neon vào lưới của bạn đã!</p>
+            <a href="{{ url_for('index') }}#games" class="btn btn-neon">Khám phá cửa hàng</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
